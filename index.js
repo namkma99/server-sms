@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const pino = require('express-pino-logger')();
 const cors = require('cors')
+const cron = require('node-cron');
+const database = require('./firebaseConfig');
 const client = require('twilio')(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
@@ -17,7 +19,6 @@ app.use(cors())
 //   res.setHeader('Content-Type', 'application/json');
 //   res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
 // });
-
 app.post('/api/messages', (req, res) => {
   res.header('Content-Type', 'application/json');
   client.messages
@@ -35,6 +36,33 @@ app.post('/api/messages', (req, res) => {
     });
 });
 
-app.listen(4000, () =>
-  console.log('Express server is running on localhost:4000')
+cron.schedule('* * * * *',async () => {
+  console.log('running a task every minute');
+  database.ref('students').once('value')
+  .then(function(snapshot) {
+      console.log( snapshot.val() )
+  })
+  // const User = database.collection("subjects");
+  // const snapshot = await User.get();
+  // const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  // console.log("::list::", list)
+  
+  
+});
+
+app.listen(3000, () =>
+  console.log('Express server is running on localhost:3000')
 );
+
+
+// cron.schedule('00 8 * * *', function(){
+//   const message = '@everyone have a good day guys!';
+//  client.messages
+//   .create({
+//     from: process.env.TWILIO_PHONE_NUMBER,
+//     to: "+84373690243",
+//     body: "Test send sms"
+//   })
+// });
+
+
