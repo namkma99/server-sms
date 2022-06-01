@@ -7,7 +7,7 @@
     "node-cron": "^3.0.0"
   },
   "scripts": {
-    "server": "node-env-run index.js --exec nodemon | pino-colada",
+    "start": "node-env-run index.js --exec nodemon | pino-colada",
     "dev": "run-p server start"
   },
   "proxy": "http://localhost:3001/",
