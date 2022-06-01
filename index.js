@@ -42,12 +42,6 @@ cron.schedule('* * * * *',async () => {
   .then(function(snapshot) {
       console.log( snapshot.val() )
   })
-  // const User = database.collection("subjects");
-  // const snapshot = await User.get();
-  // const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  // console.log("::list::", list)
-  
-  
 });
 
 app.listen(3000, () =>
