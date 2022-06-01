@@ -34,80 +34,121 @@ app.post('/api/messages', (req, res) => {
     });
 });
 
-cron.schedule('* * * * *',async () => {
-  console.log('running a task every minute');
-  const date = new Date();
-  const day = date.getDay();
-  let currentDayToString = getCurrentDay()
-  const snapshotSubject = await database.ref('subjects').once('value')
-  const snapshotStudent = await database.ref('students').once('value')
+// cron.schedule('* * * * *',async () => {
+//   console.log('running a task every minute');
+//   const date = new Date();
+//   const day = date.getDay();
+//   let currentDayToString = getCurrentDay()
+//   const snapshotSubject = await database.ref('subjects').once('value')
+//   const snapshotStudent = await database.ref('students').once('value')
   
-  let valueSubjects = snapshotSubject.val();
-  let listSubject = [];
-  let listSudent = [];
-  for(let i in snapshotSubject.val()) {
-    listSubject.push(valueSubjects[i])
-  }
-  for(let i in snapshotStudent.val()) {
-    listSudent.push(snapshotStudent.val()[i])
-  }
-  const subject = listSubject.find(sub => {
-    const dayInSubject = String(sub.dayOfWeek)
-    if(dayInSubject.toUpperCase() === currentDayToString) {
-      return sub
-    }
-  })
-  const listKeyCheckIn = Object.keys(subject.checkInTime)
-  const checkInTime = listKeyCheckIn.some((time => isToday(new Date(subject.checkInTime[time]))))
-  console.log("checkInTime::", checkInTime);
-  const currentDate = getCurrentDate()
-  if(!checkInTime) {
-    const data = {}
-    for(let i in snapshotStudent.val()) {
-      data[i] = ''
-    }
-    database.ref(`subjects/${day}/checkInTime/${currentDate}`).set(data) 
-  } else {
-    console.log("subject.checkInTime::", subject)
-    const listFingerCheckIn = subject.checkInTime[`${currentDate}`]
-    console.log("listFingerCheckIn::", listFingerCheckIn)
-    const data = {}
-    listSudent.forEach(student => {
-      const isCheckStudent = Object.keys(listFingerCheckIn).some(key => listFingerCheckIn[key] === student.fingerId)
-      if(!isCheckStudent) {
-        console.log("isCheckStudent::", isCheckStudent)
-        data[student.fingerId] = ''
+//   let valueSubjects = snapshotSubject.val();
+//   let listSubject = [];
+//   let listSudent = [];
+//   for(let i in snapshotSubject.val()) {
+//     listSubject.push(valueSubjects[i])
+//   }
+//   for(let i in snapshotStudent.val()) {
+//     listSudent.push(snapshotStudent.val()[i])
+//   }
+//   const subject = listSubject.find(sub => {
+//     const dayInSubject = String(sub.dayOfWeek)
+//     if(dayInSubject.toUpperCase() === currentDayToString) {
+//       return sub
+//     }
+//   })
+//   const listKeyCheckIn = Object.keys(subject.checkInTime)
+//   const checkInTime = listKeyCheckIn.some((time => isToday(new Date(subject.checkInTime[time]))))
+//   console.log("checkInTime::", checkInTime);
+//   const currentDate = getCurrentDate()
+//   if(!checkInTime) {
+//     const data = {}
+//     for(let i in snapshotStudent.val()) {
+//       data[i] = ''
+//     }
+//     database.ref(`subjects/${day}/checkInTime/${currentDate}`).set(data) 
+//   } else {
+//     console.log("subject.checkInTime::", subject)
+//     const listFingerCheckIn = subject.checkInTime[`${currentDate}`]
+//     console.log("listFingerCheckIn::", listFingerCheckIn)
+//     const data = {}
+//     listSudent.forEach(student => {
+//       const isCheckStudent = Object.keys(listFingerCheckIn).some(key => listFingerCheckIn[key] === student.fingerId)
+//       if(!isCheckStudent) {
+//         console.log("isCheckStudent::", isCheckStudent)
+//         data[student.fingerId] = ''
         
-      }
-    })
-    console.log("data::", data)
-    database.ref(`subjects/${day}/checkInTime/${currentDate}`).set(data)
-  }
-});
+//       }
+//     })
+//     console.log("data::", data)
+//     database.ref(`subjects/${day}/checkInTime/${currentDate}`).set(data)
+//   }
+// });
 
-cron.schedule('00 8 * * *',async () => {
+cron.schedule('* * * * *',async () => {
   console.log('running a 8PM everyDay');
   const snapshotSubject = await database.ref('subjects').once('value')
   const snapshotStudent = await database.ref('students').once('value')
-  
   let valueSubjects = snapshotSubject.val();
   let listSubject = [];
   let listSudent = [];
+  let studentCount = []
   for(let i in snapshotSubject.val()) {
     listSubject.push(valueSubjects[i])
   }
   for(let i in snapshotStudent.val()) {
     listSudent.push(snapshotStudent.val()[i])
   }
+  listSudent.forEach(student => studentCount.push({id: Number(student.fingerId), count: 0}))
   listSubject = listSubject && listSubject.filter(subject => subject.id)
-  const subject = listSubject.find(sub => {
-    const dayInSubject = String(sub.dayOfWeek)
-    if(dayInSubject.toUpperCase() === currentDay) {
-      return sub
-    }
-  })
+
+  console.log("studentCount", studentCount)
+  // const subject = listSubject.find(sub => {
+  //   const dayInSubject = String(sub.dayOfWeek)
+  //   if(dayInSubject.toUpperCase() === currentDay) {
+  //     return sub
+  //   }
+  // })
+  
   // if(typeof subject !== undefined) {
-  //   subject.checkInTime.
+    const data = {
+      '2022-05-04': { '12': '17:06:08', '13': '17:21:04' },
+      '2022-06-01': { '12': '17:06:08', '13': '17:06:08' },
+      '2022-06-02': { '12': '17:06:08', '13': '17:06:08' },
+      '2022-06-03': { '12': '', '13': '17:06:08' },
+  }
+  const leaveMax = 3
+    const arr = [];
+    Object.keys(data).forEach(key => arr.push(data[key]))
+    console.log(arr)
+    const student = [12,13];
+
+    arr.forEach((value,key) => {
+        let listCheckIn = Object.keys(arr[key])
+        let count = 0
+        console.log("listCheckIn",listCheckIn)
+        
+        listCheckIn.forEach((check, index) => {
+        console.log("listCheckIn",value[check])
+            if(studentCount.some(stu=>stu.id === Number(check) && value[check])) {
+              console.log("stu")
+                studentCount[index].count += 1
+            }
+        })
+        console.log("studentCount" + value + "::", studentCount)
+    })
+
+    studentCount.forEach((value, keys) => {
+        if(value.count <= leaveMax) {
+            console.log("SENDED_SMS")
+            client.messages
+             .create({
+               from: process.env.TWILIO_PHONE_NUMBER,
+               to: "+84373690243",
+               body: "Sinh vien co ma la: "+ value.id + " da nghi qua so buoi cho phep. Vui long lien he voi giang vien de trinh bay !"
+             })
+        }
+    })
   // }
   // subject.
 })
@@ -150,6 +191,8 @@ cron.schedule('00 8 * * *',async () => {
 /*
 const Max = 4
 const leaveMax = 3
+const studentCount = [{12: {count: 0}},{13: {count: 0}}]
+
 const data = {
     '2022-05-04': { '12': '17:06:08', '13': '17:21:04' },
     '2022-06-01': { '12': '17:06:08', '13': '17:06:08' },
@@ -158,19 +201,27 @@ const data = {
 }
 const arr = [];
 Object.keys(data).forEach(key => arr.push(data[key]))
+console.log(arr)
 const student = [12,13];
 arr.forEach((value,key) => {
-    let listCheckIn = arr[key]
+    let listCheckIn = Object.keys(arr[key])
     let count = 0
     console.log("listCheckIn",listCheckIn)
-    listCheckIn.forEach(check => {
     
-        if(student.some(stu=>stu === Number(check))) {
-            count = count + 1;
+    listCheckIn.forEach((check, index) => {
+    console.log("listCheckIn",value[check])
+        if(student.some(stu=>stu === Number(check) && value[check])) {
+            studentCount[index][check].count += 1
         }
         
     })
-    console.log("count" + value + "::", count)
+    console.log("studentCount" + value + "::", studentCount)
+})
+
+studentCount.forEach((value, keys) => {
+    if(Object.values(value)[0].count <= leaveMax) {
+        console.log("SENDED_SMS")
+    }
 })
 
 */
